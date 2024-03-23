@@ -34,3 +34,17 @@ kode ini akan mengecek apakah `request_line` berisi GET request. Ketika kode sta
 
 Apabila `request_line` tidak berisi GET request, maka akan masuk ke kondisi else, dimana kita akan menginisiasi `let status_line = "HTTP/1.1 404 NOT FOUND";` dan membaca file 404.html melalui kode `let contents = fs::read_to_string("404.html").unwrap();`.<br>
 
+
+## Reflection 4
+Pada commit ke-4 ini terdapat perubahan kode di bagian: 
+```
+    let (status_line, filename) = match &request_line[..] { 
+        "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "hello.html"), 
+        "GET /sleep HTTP/1.1" => { 
+            thread::sleep(Duration::from_secs(10)); 
+            ("HTTP/1.1 200 OK", "hello.html") 
+        } 
+        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"), 
+        };
+```
+Pada kode kali ini, ditambahkan kasus ketika client request `GET /sleep HTTP/1.1`. dengan ini, server akan sleep selama 10 detik sebelum repon ke hello.html.
