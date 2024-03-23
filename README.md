@@ -48,3 +48,42 @@ Pada commit ke-4 ini terdapat perubahan kode di bagian:
         };
 ```
 Pada kode kali ini, ditambahkan kasus ketika client request `GET /sleep HTTP/1.1`. dengan ini, server akan sleep selama 10 detik sebelum repon ke hello.html.
+
+## Reflection 5
+Thread pool adalah suatu design pattern untuk mengachieve concurrency. Threadpool dibuat untuk membuat server multithreaded. Hal ini dilakukan dengan menambahkan kode `let pool = ThreadPool::new(4);` 
+
+Pada lib.rs, line `let (sender, receiver) = mpsc::channel();` akan membuat channel sebagai media komunikasi antar main thread dengan worker thread.
+
+```
+struct Worker {
+    id: usize,
+    thread: thread::JoinHandle<()>,
+}
+
+impl Worker {
+    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
+        let thread = thread::spawn(move || loop {
+            let job = receiver.lock().unwrap().recv().unwrap();
+
+            println!("Worker {id} got a job; executing.");
+
+            job();
+        });
+
+        Worker { id, thread }
+    }
+}
+```
+Kode `workers.push(Worker::new(id, Arc::clone(&receiver)));` juga akan menginisiasi worker.
+
+```
+ for stream in listener.incoming() {
+        let stream = stream.unwrap();
+
+        pool.execute(|| {
+            handle_connection(stream);
+        });
+    }
+```
+
+Pada main.rs akan dilakukan looping untuk setiap koneksi yang diterima. Koneksi tersebut akan di unwrap lalu threadPool akan menangani dan menjalankan beberapa task tersebut secara bersamaan.
